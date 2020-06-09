@@ -15,6 +15,8 @@ public class Dice : MonoBehaviour
 
     public DiceSide[] diceSides;
 
+     
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -25,19 +27,19 @@ public class Dice : MonoBehaviour
     public void DiceThrow()
     {
         if(rollDice.interactable == true)
-        {
-            RollDice();
+        {            
+                RollDice();           
         }
 
-        if(rb.IsSleeping() && !hasLanded && thrown)
+        if (rb.IsSleeping() && !hasLanded && thrown)
         {
             hasLanded = true;
             rb.useGravity = false;
             rb.isKinematic = true;
 
-            SideValueCheck();
+            SideValueCheck(diceValue);
         }
-        else if(rb.IsSleeping() && hasLanded && diceValue == 0)
+        else if (rb.IsSleeping() && hasLanded && diceValue == 0)
         {
             RollAgain();
         }
@@ -45,12 +47,12 @@ public class Dice : MonoBehaviour
 
     private void RollDice()
     {
-
+        
         if(!thrown && !hasLanded)
         {
             thrown = true;
             rb.useGravity = true;
-            rb.AddTorque(Random.Range(0, 500), Random.Range(0, 500), Random.Range(0, 500));
+            rb.AddTorque(Random.Range(500, 1000), Random.Range(500, 1000), Random.Range(500, 1000));
         }
         else if(thrown && hasLanded)
         {
@@ -64,7 +66,7 @@ public class Dice : MonoBehaviour
         Reset();
         thrown = true;
         rb.useGravity = true;
-        rb.AddTorque(Random.Range(0, 500), Random.Range(0, 500), Random.Range(0, 500));
+        rb.AddTorque(Random.Range(500, 1000), Random.Range(500, 1000), Random.Range(500, 1000));
     }
 
     private void Reset()
@@ -74,18 +76,20 @@ public class Dice : MonoBehaviour
         hasLanded = false;
         rb.useGravity = false;
         rb.isKinematic = false;
+        
     }
 
-    private void SideValueCheck()
+    public int SideValueCheck(int value)
     {
         foreach(DiceSide side in diceSides)
         {
             if(side.OnGround())
             {
-                diceValue = side.sideValue;
-                Debug.Log(diceValue + " has been rolled!");
+                value = side.sideValue;
+                Debug.Log(value + " has been rolled!");                
             }
         }
+        return value;
     }
 
 }
