@@ -28,34 +28,43 @@ public class Dice : MonoBehaviour
     {
         if(rollDice.interactable == true)
         {            
-                RollDice();           
+            RollDice();           
         }
 
         if (rb.IsSleeping() && !hasLanded && thrown)
         {
+            Debug.Log("SideValueCheck - if");
             hasLanded = true;
             rb.useGravity = false;
             rb.isKinematic = true;
-
+            thrown = false;
             SideValueCheck(diceValue);
+            if (rb.IsSleeping() && hasLanded && !thrown && diceValue == 0)
+            {
+                Debug.Log("Roll Again Called");
+                RollAgain();
+            }
         }
-        else if (rb.IsSleeping() && hasLanded && diceValue == 0)
+        else if (rb.IsSleeping() && hasLanded && !thrown && diceValue == 0)
         {
+            Debug.Log("Roll Again Called");
             RollAgain();
         }
     }
 
     private void RollDice()
     {
-        
+        Debug.Log("Inside Roll Dice");
         if(!thrown && !hasLanded)
         {
+            Debug.Log("Inside Roll Dice - if");
             thrown = true;
             rb.useGravity = true;
             rb.AddTorque(Random.Range(500, 1000), Random.Range(500, 1000), Random.Range(500, 1000));
         }
-        else if(thrown && hasLanded)
+        else // if(thrown && hasLanded)
         {
+            Debug.Log("Inside Roll Dice - else");
             Reset();
         }
 
@@ -63,6 +72,7 @@ public class Dice : MonoBehaviour
 
     private void RollAgain()
     {
+        Debug.Log("Inside Roll Again Reset Called");
         Reset();
         thrown = true;
         rb.useGravity = true;
@@ -71,6 +81,7 @@ public class Dice : MonoBehaviour
 
     private void Reset()
     {
+        Debug.Log("Inside Reset");
         transform.position = initialPos;
         thrown = false;
         hasLanded = false;
@@ -81,6 +92,7 @@ public class Dice : MonoBehaviour
 
     public int SideValueCheck(int value)
     {
+        Debug.Log("SideValueCheck - inside");
         foreach(DiceSide side in diceSides)
         {
             if(side.OnGround())
