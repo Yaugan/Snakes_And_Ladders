@@ -11,28 +11,39 @@ public class Stone : MonoBehaviour
     public Route currentRoute;
     public Dice currentDice;
 
+    public bool movePlayer = true;
+
     public void PlayerMovement()
     {
-        if(currentDice.rollDice && !isMoving)
+        if(!isMoving)
         {
+            Debug.Log("The function is at steps");
             steps = currentDice.SideValueCheck(steps);
-            Debug.Log("Dice Rolled " + steps);
-            
+            Debug.Log("Dice Rolled from other script" + steps);
 
-            if(routePosition + steps < currentRoute.childNodeList.Count)
+
+            if (routePosition + steps <= currentRoute.childNodeList.Count)
             {
-                StartCoroutine(Move());                
+                Debug.Log("inside - routePosition + steps ");
+                if (movePlayer)
+                {
+                    Debug.Log("inside - moveplayer if");
+                    StartCoroutine(Move());
+                }
+                
             }
             else
             {
                 Debug.Log("Rolled Number is too high " + steps);
             }
+
         }
     }
 
 
     IEnumerator Move()
     {
+        Debug.Log("Inside - move");
         if(isMoving)
         {
             yield break;
@@ -52,7 +63,7 @@ public class Stone : MonoBehaviour
             steps--;
             routePosition++;
         }
-
+        //movePlayer = false;
         isMoving = false;
     }
 
