@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Dice : MonoBehaviour
-{
+{ 
+    
     private Rigidbody rb;
     private bool hasLanded;
     private bool thrown;
@@ -15,93 +17,149 @@ public class Dice : MonoBehaviour
 
     public DiceSide[] diceSides;
 
-     
+    public Stone player;
+
+    public Stone AI;
+
+    public int LowerRangeValue = 1500;
+    public int HigherRangeValue = 2000;
+
+
+    public float sideValueTime;
+    public float resetTime = 5f;
+    public float downwardForce = 5f;
+
+    public GameObject PlayerAI;
+
+    public float waitTime = 5f;
+
+    public bool flag = true;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         initialPos = transform.position;
         rb.useGravity = false;
+
     }
 
-    public void DiceThrow()
+    public void DiceRoll()
     {
-        if(rollDice.interactable == true)
-        {            
-            RollDice();           
-        }
-
-        if (rb.IsSleeping() && !hasLanded && thrown)
-        {
-            Debug.Log("SideValueCheck - if");
-            hasLanded = true;
-            rb.useGravity = false;
-            rb.isKinematic = true;
-            thrown = false;
-            SideValueCheck(diceValue);
-            if (rb.IsSleeping() && hasLanded && !thrown && diceValue == 0)
-            {
-                Debug.Log("Roll Again Called");
-                RollAgain();
-            }
-        }
-        else if (rb.IsSleeping() && hasLanded && !thrown && diceValue == 0)
-        {
-            Debug.Log("Roll Again Called");
-            RollAgain();
-        }
+        Debug.Log("Interactable");
+        //if (rollDice.interactable)//issue
+        //{
+            Debug.Log("STart DIce tHrow");
+            StartCoroutine("DiceThrow");
+        //}
     }
 
+    private IEnumerator DiceThrow()
+    {
+        Debug.Log("RollDice Called");
+        RollDice();
+        yield return new WaitForSeconds(sideValueTime);
+        rollDice.gameObject.SetActive(false);
+        SideValueCheck(diceValue);
+        player.movePlayer = true;
+        player.PlayerMovement(); 
+        StartCoroutine("Reset");
+    }
+
+    private IEnumerator DiceThrowAI()
+    {
+        Debug.Log("RollDice Called for AI");
+        RollDice();
+        yield return new WaitForSeconds(sideValueTime);
+        rollDice.gameObject.SetActive(false);
+        SideValueCheck(diceValue);
+        AI.movePlayer = true;
+        AI.PlayerMovement();
+        StartCoroutine("Reset");
+    }
+    
     private void RollDice()
     {
-        Debug.Log("Inside Roll Dice");
-        if(!thrown && !hasLanded)
+        if (!thrown && !hasLanded)
         {
-            Debug.Log("Inside Roll Dice - if");
+            Debug.Log("!thrown && !hasLanded if condition");
             thrown = true;
-            rb.useGravity = true;
-            rb.AddTorque(Random.Range(500, 1000), Random.Range(500, 1000), Random.Range(500, 1000));
+            rb.useGravity = true;            
+            rb.AddTorque(Random.Range(1000, 1500), Random.Range(1200, 1500), Random.Range(1000, 1200));
+            rb.velocity = new Vector3(00, -downwardForce, 0);
         }
-        else // if(thrown && hasLanded)
+        else if (thrown && hasLanded)
         {
-            Debug.Log("Inside Roll Dice - else");
-            Reset();
+            Debug.Log("Reset Called");
+            StartCoroutine("Reset");
         }
-
     }
 
     private void RollAgain()
     {
-        Debug.Log("Inside Roll Again Reset Called");
-        Reset();
+        Debug.Log("RollAgain Accessed");
+        Debug.Log("RollAgain Reset Called");
         thrown = true;
         rb.useGravity = true;
-        rb.AddTorque(Random.Range(500, 1000), Random.Range(500, 1000), Random.Range(500, 1000));
+        rb.AddTorque(Random.Range(LowerRangeValue, HigherRangeValue), Random.Range(LowerRangeValue, HigherRangeValue), Random.Range(LowerRangeValue, HigherRangeValue));
     }
 
-    private void Reset()
+    public IEnumerator Reset()
     {
-        Debug.Log("Inside Reset");
+        yield return new WaitForSeconds(resetTime);
+
+        Debug.Log("Reset Accessed");
         transform.position = initialPos;
         thrown = false;
         hasLanded = false;
         rb.useGravity = false;
         rb.isKinematic = false;
-        
+
+        yield return new WaitForSeconds(.5f);
+        rollDice.gameObject.SetActive(true);
+
+        Debug.Log("Calling flag");
+        if (flag == true)
+        {
+            Debug.Log("Calling Flag, for true");
+            rollDice.interactable = false; 
+            yield return new WaitForSeconds(waitTime);
+            MoveAI();
+            Debug.Log("Flag Changed, now False");
+            flag = false;
+        }      
+      
+        else if (flag == false)
+        {
+            Debug.Log("Else If for flag change");
+            //DiceRoll();
+            flag = true;
+            rollDice.interactable = true;
+        }
+
     }
 
-    public int SideValueCheck(int value)
+    internal int SideValueCheck(int value)
     {
-        Debug.Log("SideValueCheck - inside");
-        foreach(DiceSide side in diceSides)
+        
+        Debug.Log("Side Value Checked" + value);
+        foreach (DiceSide side in diceSides)
         {
-            if(side.OnGround())
+            if (side.OnGround())
             {
                 value = side.sideValue;
-                Debug.Log(value + " has been rolled!");                
+                Debug.Log(value + " has been rolled!");
             }
         }
+        Debug.Log("value: " + value);
+       
         return value;
     }
 
+    private void MoveAI()
+    {
+        //yield return new WaitForSeconds(10f);
+        Debug.Log("blah!!");
+        StartCoroutine("DiceThrowAI");
+        //rollDice.interactable = false;
+    }
 }
