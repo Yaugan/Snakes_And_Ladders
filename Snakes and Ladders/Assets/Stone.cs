@@ -19,7 +19,7 @@ public class Stone : MonoBehaviour
         {
             Debug.Log("The function is at steps");
             steps = currentDice.SideValueCheck(steps);
-            Debug.Log("Dice Rolled from other script" + steps);
+            Debug.Log("Dice Rolled from other script: " + steps);
 
 
             if (routePosition + steps <= currentRoute.childNodeList.Count)
@@ -28,7 +28,7 @@ public class Stone : MonoBehaviour
                 if (movePlayer)
                 {
                     Debug.Log("inside - moveplayer if");
-                    StartCoroutine(Move());
+                    StartCoroutine(Move());//exactly...//move mai ni hai, flag mai hai.. woh false pehle hoke rolldice MoveAI pr shift ho raha hai
                 }
                 
             }
